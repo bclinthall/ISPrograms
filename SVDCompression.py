@@ -4,15 +4,12 @@ from scipy import misc
 import matplotlib.pyplot as plt
 from os import stat
 
-def show(f):
-    plt.imshow(f, cmap=plt.cm.gray)
+dtype = 'float16'
+
+def show(image):
+    plt.imshow(image, cmap=plt.cm.gray)
     plt.show()
 
-"""
-kth_svd
-given an m x n image, 
-
-"""
 
 def kth_svd(image, k):
     """
@@ -37,6 +34,7 @@ def kth_svd(image, k):
 def compress(image, k, out_file_name='compressed'):
     l, s, r, w, h, k = kth_svd(image, k)
     data = np.concatenate((l.flatten(), s.flatten(), r.flatten()))
+    data = data.astype(dtype)
     with open(out_file_name, 'wb') as output_file:
         np.array((w,h,k), dtype='uint32').tofile(output_file)
         data.tofile(output_file)
@@ -48,15 +46,15 @@ def extract(input_file_path):
     input_file = open(input_file_path, 'rb')
     w, h, k = np.fromfile(input_file, 'uint32', 3)
 
-    l = np.fromfile(input_file, 'float32', h * k)
+    l = np.fromfile(input_file, dtype, h * k)
     l = l.reshape([h, k])
     l = np.pad(l, [(0, 0), (0, h-k)], 'constant', constant_values=0)
 
-    s = np.fromfile(input_file, 'float32', k)
+    s = np.fromfile(input_file, dtype, k)
     s = s * np.identity(k)
     s = np.pad(s, [(0, h - k), (0, w - k)], 'constant', constant_values=0)
 
-    r = np.fromfile(input_file, 'float32', k * w)
+    r = np.fromfile(input_file, dtype, k * w)
     r = r.reshape([k, w])
     r = np.pad(r, [(0, w-k), (0, 0)], 'constant', constant_values=0)
 
@@ -69,6 +67,7 @@ def show_image_and_compressed_image(
         k=50):
     with urlopen(url) as file:
         image = misc.imread(file, mode='L', flatten=True)
+    #image = misc.imread('cat.jpg', mode='L', flatten=True)
     show(image)
     file_name = 'compressed'
     original_size = image.size # one byte per pixes
@@ -83,4 +82,4 @@ print("compressed by a factor of %f" % compression)
 image_compressed = l.dot(s.dot(r))
 show(image_compressed)
 '''
-show_image_and_compressed_image(k=20)
+show_image_and_compressed_image(k=50)
