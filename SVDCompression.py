@@ -78,8 +78,8 @@ def show_image_and_compressed_image(
 
 '''
 l, s, r, compression = svd(image, k)
-print("compressed by a factor of %f" % compression)
+print("compressed by a fa0.958284ctor of %f" % compression)
 image_compressed = l.dot(s.dot(r))
 show(image_compressed)
 '''
-show_image_and_compressed_image(k=50)
+show_image_and_compressed_image(k=100)
